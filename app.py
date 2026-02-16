@@ -1183,7 +1183,25 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section">GPU</div>', unsafe_allow_html=True)
     gpu_names = list(GPU_DATABASE.keys())
     gpu_name = st.selectbox("GPU model", gpu_names, index=gpu_names.index("NVIDIA A100 (80GB)"), label_visibility="collapsed")
-    gpu_spec = GPU_DATABASE[gpu_name]
+    gpu_spec = GPU_DATABASE[gpu_name].copy()
+
+    # Custom GPU inputs
+    if gpu_name == "Custom GPU":
+        with st.expander("⚙️ Custom GPU Configuration", expanded=True):
+            gpu_spec['vram'] = st.number_input("VRAM (GB)", min_value=1, max_value=1024, value=int(gpu_spec['vram']), step=1)
+            gpu_spec['tflops_fp16'] = st.number_input("FP16 TFLOPs", min_value=1, max_value=10000, value=int(gpu_spec['tflops_fp16']), step=1)
+            gpu_spec['bandwidth'] = st.number_input("Memory Bandwidth (GB/s)", min_value=100, max_value=20000, value=int(gpu_spec['bandwidth']), step=50)
+            
+            st.caption("Optional fields (leave at 0 if unknown):")
+            col1, col2 = st.columns(2)
+            with col1:
+                gpu_spec['tflops_fp32'] = st.number_input("FP32 TFLOPs", min_value=0, max_value=5000, value=0, step=1)
+                gpu_spec['tflops_tf32'] = st.number_input("TF32 TFLOPs", min_value=0, max_value=10000, value=0, step=1)
+            with col2:
+                gpu_spec['price_hr'] = st.number_input("Price/hour ($)", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
+                gpu_spec['tdp'] = st.number_input("TDP (Watts)", min_value=0, max_value=2000, value=0, step=10)
+            
+            gpu_spec['nvlink'] = st.checkbox("NVLink Support", value=gpu_spec['nvlink'])
 
     st.markdown(f"""
     <div class="gpu-spec-grid">
@@ -1516,6 +1534,9 @@ if is_training:
         st.markdown('<div class="section-title">GPU Comparison (sorted by cost)</div>', unsafe_allow_html=True)
         comp_rows = []
         for g_name, g_spec in GPU_DATABASE.items():
+            # Skip Custom GPU in comparison table
+            if g_name == "Custom GPU":
+                continue
             needed = math.ceil(estimation.total_vram / g_spec["vram"])
             t_g = estimate_training_time(estimation, g_spec, needed, precision, deepspeed_stage, framework)
             cost_g = g_spec["price_hr"] * needed * (t_g.training_time_seconds / 3600)

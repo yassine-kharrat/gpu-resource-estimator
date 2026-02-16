@@ -37,6 +37,8 @@ except ImportError:
 # GPU DATABASE
 # ═══════════════════════════════════════════════════════════════════
 GPU_DATABASE = {
+    # ─── Custom GPU ───
+    "Custom GPU": {"vram": 24, "tflops_fp16": 100, "tflops_fp32": 0, "tflops_tf32": 0, "bandwidth": 500, "tdp": 0, "price_hr": 0.0, "nvlink": False, "arch": ""}, 
     # ─── NVIDIA Consumer / Entry ───
     "NVIDIA RTX 3070 (8GB)": {"vram": 8, "tflops_fp16": 81, "tflops_fp32": 20.3, "tflops_tf32": 40, "bandwidth": 448, "tdp": 220, "price_hr": 0.25, "nvlink": False, "arch": "Ampere"},
     "NVIDIA RTX 3080 (10GB)": {"vram": 10, "tflops_fp16": 119, "tflops_fp32": 29.8, "tflops_tf32": 59, "bandwidth": 760, "tdp": 320, "price_hr": 0.35, "nvlink": False, "arch": "Ampere"},
